@@ -20,7 +20,7 @@ const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cartItem');
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
