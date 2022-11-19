@@ -54,11 +54,12 @@ exports.getCart = (req, res, next) => {
     return cart
     .getProducts()
     .then(products => {
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: products
-      });
+      res.status(200).json({ success: true, products: products})
+      // res.render('shop/cart', {
+      //   path: '/cart',
+      //   pageTitle: 'Your Cart',
+      //   products: products
+      // });
     })
     .catch(err => console.log(err))
   })
@@ -66,6 +67,9 @@ exports.getCart = (req, res, next) => {
 };
  
 exports.postCart = (req, res, next) => {
+  if(!req.body.productId){
+    res.status(400).json({success: false, errMsg:'Product id is missing'})
+  }
   const prodId = req.body.productId;
   let fetchCart;
   let newQuantity = 1;
