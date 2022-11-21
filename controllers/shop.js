@@ -1,10 +1,28 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
+const ItemsperPage = 2;
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  const page = +req.query.page;
+  let totalItems;
+  Product.count()
+  .then(total => {
+    totalItems = total;
+    return Product.findAll({
+        offset: (page-1) * ItemsperPage,
+        limit: ItemsperPage,  
+      })
+  })
   .then((products) =>{
-    res.json({products,success : true});
+    res.json({
+      products:products,
+      currentPage : page,
+      hasNextPage : ItemsperPage * page < totalItems,
+      nextPage : page+1,
+      hasPrevPage : page > 1,
+      prevPage : page - 1, 
+      lastPage : Math.ceil(totalItems / ItemsperPage)
+    });
     // res.render('shop/product-list', {
     //   prods: products,
     //   pageTitle: 'All Products',
