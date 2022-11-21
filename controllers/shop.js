@@ -1,5 +1,6 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
+const CartItem = require('../models/cartItem');
 const ItemsperPage = 2;
 
 exports.getProducts = (req, res, next) => {
@@ -144,6 +145,33 @@ exports.getOrders = (req, res, next) => {
     pageTitle: 'Your Orders'
   });
 };
+
+exports.postOrder = async (req,res,next) => {
+  let order = await req.user.createOrder();
+  let OrderCreated = [];
+  req.user.getCart()
+  .then(cart=>{
+      console.log(cart)
+      cart.getProducts()
+      .then(async(products)=>{
+          console.log(products)
+          for(let i=0;i<products.length;i++) {
+              // console.log('prodycts',products[i])
+             let orderItems = await order.addProduct(products[i] , { 
+                  through : {quantity : products[i].cartItem.quantity} })
+                  OrderCreated.push(orderItems)
+                      console.log(OrderCreated)
+                 }
+                 CartItem.destroy({where:{cartId : cart.id}})
+                 .then(response=>console.log(response))
+                 res.status(200).json({ success : true,data: OrderCreated})
+               })
+      .catch( err => { console.log(err) })
+  })
+  .catch(err =>{
+       console.log(err)
+  })
+}
 
 exports.getCheckout = (req, res, next) => {
   res.render('shop/checkout', {
