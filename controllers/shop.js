@@ -140,10 +140,16 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
-    path: '/orders',
-    pageTitle: 'Your Orders'
-  });
+  req.user.getOrders({ include: ["products"]})
+  .then(products => {
+    console.log(products);
+    res.status(200).json({ products : products})
+})
+.catch(err => { console.log(err) })
+  // res.render('shop/orders', {
+  //   path: '/orders',
+  //   pageTitle: 'Your Orders'
+  // });
 };
 
 exports.postOrder = async (req,res,next) => {
@@ -156,7 +162,7 @@ exports.postOrder = async (req,res,next) => {
       .then(async(products)=>{
           console.log(products)
           for(let i=0;i<products.length;i++) {
-              // console.log('prodycts',products[i])
+              console.log('products',products[i])
              let orderItems = await order.addProduct(products[i] , { 
                   through : {quantity : products[i].cartItem.quantity} })
                   OrderCreated.push(orderItems)
