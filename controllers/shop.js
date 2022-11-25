@@ -154,28 +154,29 @@ exports.getOrders = (req, res, next) => {
 
 exports.postOrder = async (req,res,next) => {
   let order = await req.user.createOrder();
-  let OrderCreated = [];
+  let orders = [];
+
   req.user.getCart()
-  .then(cart=>{
-      console.log(cart)
-      cart.getProducts()
-      .then(async(products)=>{
-          console.log(products)
-          for(let i=0;i<products.length;i++) {
-              console.log('products',products[i])
-             let orderItems = await order.addProduct(products[i] , { 
-                  through : {quantity : products[i].cartItem.quantity} })
-                  OrderCreated.push(orderItems)
-                      console.log(OrderCreated)
-                 }
-                 CartItem.destroy({where:{cartId : cart.id}})
-                 .then(response=>console.log(response))
-                 res.status(200).json({ success : true,data: OrderCreated})
-               })
-      .catch( err => { console.log(err) })
-  })
-  .catch(err =>{
-       console.log(err)
+  .then(cart => {
+    console.log(cart)
+    cart.getProducts()
+    .then(async(products) => {
+      console.log(products);
+      for(let i=0;i<products.length;i++){
+        let orderItems = await order.addProduct(products[i], { through: {quantity : products[i].cartItem.quantity}})
+        orders.push(orderItems)
+        console.log(orders)
+      }
+      CartItem.destroy({where:{cartId: cart.id}})
+      .then(res => { 
+        console.log(res)
+        res.status(200).json({data: orders, success:true})
+      })
+      .catch(err => { console.log(err)})
+    })
+    .catch(err => { 
+      res.status(500).json(err)
+     })
   })
 }
 
